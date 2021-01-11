@@ -1,6 +1,6 @@
 package by.mjs.ivoninsky.gift.controller;
 
-import by.mjs.ivoninsky.gift.model.CustomResponse;
+import by.mjs.ivoninsky.gift.model.ErrorResponse;
 import by.mjs.ivoninsky.gift.model.CustomSearchRequest;
 import by.mjs.ivoninsky.gift.model.dto.GiftCertificateDto;
 import by.mjs.ivoninsky.gift.model.dto.TagDto;
@@ -10,14 +10,13 @@ import by.mjs.ivoninsky.gift.util.Status;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Set;
 
-@Controller
-@RequestMapping("/api/v1.0/gift")
+//rest controller
+@RestController("/api/v1/gifts")
 public class GiftController {
     private final GiftService giftService;
 
@@ -26,29 +25,30 @@ public class GiftController {
         this.giftService = giftService;
     }
 
-    @GetMapping("/all")
-    public ResponseEntity<CustomResponse<List<GiftCertificateDto>>> allGifts(){
+    @GetMapping("/")
+    //remove custom response
+    public ResponseEntity<ErrorResponse<List<GiftCertificateDto>>> allGifts(){
         List<GiftCertificateDto> allGifts = giftService.getAllGifts();
-        CustomResponse<List<GiftCertificateDto>> build = CustomResponse.<List<GiftCertificateDto>>builder()
+        ErrorResponse<List<GiftCertificateDto>> build = ErrorResponse.<List<GiftCertificateDto>>builder()
                 .message(allGifts)
-                .code(Status.SUCCESSFULL.getCode()).build();
+                .code(Status.SUCCESSFUL.getCode()).build();
         return ResponseEntity.ok(build);
     }
 
-    @GetMapping("/{giftId}")
-    public ResponseEntity<CustomResponse<GiftCertificateDto>> giftById(
-            @PathVariable Long giftId
+    @GetMapping("/{id}")
+    public ResponseEntity<ErrorResponse<GiftCertificateDto>> giftById(
+            @PathVariable Long id
     ){
         try{
-            GiftCertificateDto giftById = giftService.getGiftById(giftId);
+            GiftCertificateDto giftById = giftService.getGiftById(id);
 
-            CustomResponse<GiftCertificateDto> build = CustomResponse.<GiftCertificateDto>builder()
+            ErrorResponse<GiftCertificateDto> build = ErrorResponse.<GiftCertificateDto>builder()
                     .message(giftById)
-                    .code(Status.SUCCESSFULL.getCode()).build();
+                    .code(Status.SUCCESSFUL.getCode()).build();
             return ResponseEntity.ok(build);
         }
         catch (GiftNotFoundException e){
-            CustomResponse<GiftCertificateDto> body = CustomResponse.<GiftCertificateDto>builder()
+            ErrorResponse<GiftCertificateDto> body = ErrorResponse.<GiftCertificateDto>builder()
                     .code(Status.GIFT_NOT_FOUND.getCode())
                     .comment(Status.GIFT_NOT_FOUND.getMessage()).build();
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
@@ -56,52 +56,53 @@ public class GiftController {
     }
 
     @PostMapping("/search")
-    public ResponseEntity<CustomResponse<List<GiftCertificateDto>>> searchGift(
+    public ResponseEntity<ErrorResponse<List<GiftCertificateDto>>> searchGift(
             @RequestBody CustomSearchRequest customSearchRequest
             ){
 
         List<GiftCertificateDto> giftCertificateDtos = giftService.searchGifts(customSearchRequest);
 
-        CustomResponse<List<GiftCertificateDto>> build = CustomResponse.<List<GiftCertificateDto>>builder()
+        ErrorResponse<List<GiftCertificateDto>> build = ErrorResponse.<List<GiftCertificateDto>>builder()
                 .message(giftCertificateDtos)
-                .code(Status.SUCCESSFULL.getCode()).build();
+                .code(Status.SUCCESSFUL.getCode()).build();
         return ResponseEntity.ok(build);
     }
 
+    //save one gift
     @PostMapping("/create")
-    public ResponseEntity<CustomResponse> createGifts(
+    public ResponseEntity<ErrorResponse> createGifts(
             @RequestBody List<GiftCertificateDto> giftCertificateDtoList
     ){
         giftService.createGift(giftCertificateDtoList);
 
-        CustomResponse<Object> build = CustomResponse.builder()
-                .code(Status.SUCCESSFULL.getCode()).build();
+        ErrorResponse<Object> build = ErrorResponse.builder()
+                .code(Status.SUCCESSFUL.getCode()).build();
 
         return ResponseEntity.ok(build);
     }
 
     @PostMapping("/update")
-    public ResponseEntity<CustomResponse> updateGift(
+    public ResponseEntity<ErrorResponse> updateGift(
             @RequestBody GiftCertificateDto giftCertificateDto
     ) {
         giftService.updateGift(giftCertificateDto);
-        CustomResponse<Object> build = CustomResponse.builder()
-                .code(Status.SUCCESSFULL.getCode()).build();
+        ErrorResponse<Object> build = ErrorResponse.builder()
+                .code(Status.SUCCESSFUL.getCode()).build();
         return ResponseEntity.ok(build);
     }
 
-    @DeleteMapping("/delete/{giftId}")
-    public ResponseEntity<CustomResponse> deleteGift(
+    @DeleteMapping("/{giftId}")
+    public ResponseEntity<ErrorResponse> deleteGift(
             @PathVariable Long giftId
     ) {
         try{
             giftService.deleteGiftById(giftId);
-            CustomResponse<Object> build = CustomResponse.builder()
-                    .code(Status.SUCCESSFULL.getCode()).build();
+            ErrorResponse<Object> build = ErrorResponse.builder()
+                    .code(Status.SUCCESSFUL.getCode()).build();
             return ResponseEntity.ok(build);
         }
         catch (GiftNotFoundException e){
-            CustomResponse<GiftCertificateDto> body = CustomResponse.<GiftCertificateDto>builder()
+            ErrorResponse<GiftCertificateDto> body = ErrorResponse.<GiftCertificateDto>builder()
                     .code(Status.GIFT_NOT_FOUND.getCode())
                     .comment(Status.GIFT_NOT_FOUND.getMessage()).build();
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
@@ -109,18 +110,18 @@ public class GiftController {
     }
 
     @PostMapping("/tags/{giftId}")
-    public ResponseEntity<CustomResponse<Set<TagDto>>> getGiftTags(
+    public ResponseEntity<ErrorResponse<Set<TagDto>>> getGiftTags(
             @PathVariable Long giftId
     ) {
         try {
             Set<TagDto> tagsByGiftId = giftService.getTagsByGiftId(giftId);
 
-            CustomResponse<Set<TagDto>> build = CustomResponse.<Set<TagDto>>builder()
+            ErrorResponse<Set<TagDto>> build = ErrorResponse.<Set<TagDto>>builder()
                     .message(tagsByGiftId)
-                    .code(Status.SUCCESSFULL.getCode()).build();
+                    .code(Status.SUCCESSFUL.getCode()).build();
             return ResponseEntity.ok(build);
         } catch (GiftNotFoundException e){
-            CustomResponse<Set<TagDto>> body = CustomResponse.<Set<TagDto>>builder()
+            ErrorResponse<Set<TagDto>> body = ErrorResponse.<Set<TagDto>>builder()
                     .code(Status.GIFT_NOT_FOUND.getCode())
                     .comment(Status.GIFT_NOT_FOUND.getMessage()).build();
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);

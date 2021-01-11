@@ -13,6 +13,7 @@ import java.io.Serializable;
 @AllArgsConstructor
 public class CustomSearchRequest implements Serializable {
     private String name;
+    private String type;
 
     private Integer priceFrom;
     private Integer priceTo;

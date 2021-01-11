@@ -13,7 +13,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
-public class TagDaoImpl implements TagDao {
+public class TagDaoMockImpl implements TagDao {
     private final List<TagDto> tagDtoList = new ArrayList<>();
 
     {

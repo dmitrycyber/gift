@@ -8,13 +8,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public enum Status {
-    SUCCESSFULL(200, "Successful"),
+    SUCCESSFUL(200, "Successful"),
     GIFT_NOT_FOUND(1001, "Gift not found"),
     TAG_NOT_FOUND(1002, "Tag not found"),
-
-
-
-
 
 
     DEFAULT(1099, "Something wrong, try later");

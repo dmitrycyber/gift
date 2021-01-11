@@ -12,7 +12,7 @@ import java.io.Serializable;
 @Data
 @Builder
 @AllArgsConstructor
-public class CustomResponse<T> implements Serializable {
+public class ErrorResponse<T> implements Serializable {
     private T message;
     private String comment;
     private int code;

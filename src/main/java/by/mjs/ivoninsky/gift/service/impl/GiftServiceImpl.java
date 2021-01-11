@@ -30,6 +30,7 @@ public class GiftServiceImpl implements GiftService {
     @Override
     public GiftCertificateDto getGiftById(Long giftId) throws ServiceException {
         return giftDao.findGiftById(giftId);
+//        throw new ServiceException();
     }
 
     @Override
@@ -38,11 +39,13 @@ public class GiftServiceImpl implements GiftService {
         return null;
     }
 
+    //return created object
     @Override
     public void createGift(List<GiftCertificateDto> giftCertificateDtoList) throws ServiceException {
         giftDao.createGift(giftCertificateDtoList);
     }
 
+    //return updated object
     @Override
     public void updateGift(GiftCertificateDto giftCertificateDto) throws ServiceException {
         giftDao.updateGift(giftCertificateDto);

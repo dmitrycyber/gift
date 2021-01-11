@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Set;
 
 @Component
-public class GiftDaoImpl implements GiftDao {
+public class GiftDaoMockImpl implements GiftDao {
     private final List<GiftCertificateDto> giftList = new ArrayList<>();
 
     {
