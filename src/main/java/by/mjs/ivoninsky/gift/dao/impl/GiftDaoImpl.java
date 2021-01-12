@@ -46,7 +46,7 @@ public class GiftDaoImpl implements GiftDao {
 
     @Override
     public GiftCertificateDto findGiftById(Long giftId) throws DaoException {
-        return null;
+        return jdbcTemplate.queryForObject("select * from gift_certificate where id = ?",  ROW_MAPPER, giftId);
     }
 
     @Override
