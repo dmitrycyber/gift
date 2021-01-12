@@ -115,7 +115,7 @@ public class GiftController {
     @DeleteMapping("/{giftId}")
     public ResponseEntity<ErrorResponse> deleteGift(
             @PathVariable Long giftId
-    ) {1203
+    ) {
         giftService.deleteGiftById(giftId);
         ErrorResponse<Object> build = ErrorResponse.builder()
                 .code(Status.SUCCESSFUL.getCode()).build();
