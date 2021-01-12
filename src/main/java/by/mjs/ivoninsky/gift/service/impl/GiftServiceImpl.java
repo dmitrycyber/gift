@@ -7,6 +7,7 @@ import by.mjs.ivoninsky.gift.model.dto.TagDto;
 import by.mjs.ivoninsky.gift.service.GiftService;
 import by.mjs.ivoninsky.gift.service.exception.ServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -17,7 +18,7 @@ public class GiftServiceImpl implements GiftService {
     private final GiftDao giftDao;
 
     @Autowired
-    public GiftServiceImpl(GiftDao giftDao) {
+    public GiftServiceImpl(@Qualifier("giftDaoImpl") GiftDao giftDao) {
         this.giftDao = giftDao;
     }
 

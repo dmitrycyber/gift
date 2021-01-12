@@ -7,27 +7,56 @@ import by.mjs.ivoninsky.gift.model.dto.TagDto;
 import by.mjs.ivoninsky.gift.service.GiftService;
 import by.mjs.ivoninsky.gift.dao.exception.GiftNotFoundException;
 import by.mjs.ivoninsky.gift.util.Status;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.servlet.ModelAndView;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.Set;
 
 //rest controller
-@RestController("/api/v1/gifts")
+@Controller
+@RequestMapping("/api/v1/gifts")
+//@RestController()
 public class GiftController {
     private final GiftService giftService;
+    private final ObjectMapper objectMapper;
 
     @Autowired
-    public GiftController(GiftService giftService) {
+    public GiftController(GiftService giftService, ObjectMapper objectMapper) {
         this.giftService = giftService;
+        this.objectMapper = objectMapper;
     }
 
-    @GetMapping("/")
+
+    @ExceptionHandler(GiftNotFoundException.class)
+    @SneakyThrows
+    public ModelAndView handleError(HttpServletRequest request, HttpServletResponse response, Exception ex) {
+        System.out.println("AT URI: " + request.getRequestURI() + " HANDLE EXCEPTION: " + ex);
+
+        ErrorResponse<GiftCertificateDto> body = ErrorResponse.<GiftCertificateDto>builder()
+                .code(Status.GIFT_NOT_FOUND.getCode())
+                .comment(Status.GIFT_NOT_FOUND.getMessage()).build();
+
+        response.setStatus(HttpStatus.INSUFFICIENT_STORAGE.value());
+        response.getWriter().write(objectMapper.writeValueAsString(body));
+        return new ModelAndView();
+    }
+
+
+    @GetMapping("")
     //remove custom response
-    public ResponseEntity<ErrorResponse<List<GiftCertificateDto>>> allGifts(){
+    //add search request too
+    public ResponseEntity<ErrorResponse<List<GiftCertificateDto>>> allGifts() {
         List<GiftCertificateDto> allGifts = giftService.getAllGifts();
         ErrorResponse<List<GiftCertificateDto>> build = ErrorResponse.<List<GiftCertificateDto>>builder()
                 .message(allGifts)
@@ -38,27 +67,19 @@ public class GiftController {
     @GetMapping("/{id}")
     public ResponseEntity<ErrorResponse<GiftCertificateDto>> giftById(
             @PathVariable Long id
-    ){
-        try{
-            GiftCertificateDto giftById = giftService.getGiftById(id);
+    ) {
+        GiftCertificateDto giftById = giftService.getGiftById(id);
 
-            ErrorResponse<GiftCertificateDto> build = ErrorResponse.<GiftCertificateDto>builder()
-                    .message(giftById)
-                    .code(Status.SUCCESSFUL.getCode()).build();
-            return ResponseEntity.ok(build);
-        }
-        catch (GiftNotFoundException e){
-            ErrorResponse<GiftCertificateDto> body = ErrorResponse.<GiftCertificateDto>builder()
-                    .code(Status.GIFT_NOT_FOUND.getCode())
-                    .comment(Status.GIFT_NOT_FOUND.getMessage()).build();
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
-        }
+        ErrorResponse<GiftCertificateDto> build = ErrorResponse.<GiftCertificateDto>builder()
+                .message(giftById)
+                .code(Status.SUCCESSFUL.getCode()).build();
+        return ResponseEntity.ok(build);
     }
 
     @PostMapping("/search")
     public ResponseEntity<ErrorResponse<List<GiftCertificateDto>>> searchGift(
             @RequestBody CustomSearchRequest customSearchRequest
-            ){
+    ) {
 
         List<GiftCertificateDto> giftCertificateDtos = giftService.searchGifts(customSearchRequest);
 
@@ -72,7 +93,7 @@ public class GiftController {
     @PostMapping("/create")
     public ResponseEntity<ErrorResponse> createGifts(
             @RequestBody List<GiftCertificateDto> giftCertificateDtoList
-    ){
+    ) {
         giftService.createGift(giftCertificateDtoList);
 
         ErrorResponse<Object> build = ErrorResponse.builder()
@@ -94,37 +115,22 @@ public class GiftController {
     @DeleteMapping("/{giftId}")
     public ResponseEntity<ErrorResponse> deleteGift(
             @PathVariable Long giftId
-    ) {
-        try{
-            giftService.deleteGiftById(giftId);
-            ErrorResponse<Object> build = ErrorResponse.builder()
-                    .code(Status.SUCCESSFUL.getCode()).build();
-            return ResponseEntity.ok(build);
-        }
-        catch (GiftNotFoundException e){
-            ErrorResponse<GiftCertificateDto> body = ErrorResponse.<GiftCertificateDto>builder()
-                    .code(Status.GIFT_NOT_FOUND.getCode())
-                    .comment(Status.GIFT_NOT_FOUND.getMessage()).build();
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
-        }
+    ) {1203
+        giftService.deleteGiftById(giftId);
+        ErrorResponse<Object> build = ErrorResponse.builder()
+                .code(Status.SUCCESSFUL.getCode()).build();
+        return ResponseEntity.ok(build);
     }
 
     @PostMapping("/tags/{giftId}")
     public ResponseEntity<ErrorResponse<Set<TagDto>>> getGiftTags(
             @PathVariable Long giftId
     ) {
-        try {
-            Set<TagDto> tagsByGiftId = giftService.getTagsByGiftId(giftId);
+        Set<TagDto> tagsByGiftId = giftService.getTagsByGiftId(giftId);
 
-            ErrorResponse<Set<TagDto>> build = ErrorResponse.<Set<TagDto>>builder()
-                    .message(tagsByGiftId)
-                    .code(Status.SUCCESSFUL.getCode()).build();
-            return ResponseEntity.ok(build);
-        } catch (GiftNotFoundException e){
-            ErrorResponse<Set<TagDto>> body = ErrorResponse.<Set<TagDto>>builder()
-                    .code(Status.GIFT_NOT_FOUND.getCode())
-                    .comment(Status.GIFT_NOT_FOUND.getMessage()).build();
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
-        }
+        ErrorResponse<Set<TagDto>> build = ErrorResponse.<Set<TagDto>>builder()
+                .message(tagsByGiftId)
+                .code(Status.SUCCESSFUL.getCode()).build();
+        return ResponseEntity.ok(build);
     }
 }
