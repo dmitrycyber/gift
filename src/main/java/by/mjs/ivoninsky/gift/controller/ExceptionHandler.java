@@ -22,7 +22,6 @@ public class ExceptionHandler extends ResponseEntityExceptionHandler {
         ErrorResponse<Object> comment = ErrorResponse.builder()
                 .code(Status.DEFAULT.getCode())
                 .comment(Status.DEFAULT.getMessage()).build();
-        //TODO return 500 status code
         return handleExceptionInternal(ex, comment, new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR, request);
     }
 }

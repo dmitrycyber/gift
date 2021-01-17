@@ -15,5 +15,4 @@ import java.util.Set;
 public class TagDto implements Serializable {
     private Long id;
     private String name;
-    private Set<GiftCertificateDto> gifts;
 }

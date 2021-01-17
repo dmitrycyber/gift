@@ -12,7 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 import java.util.Set;
 
@@ -67,8 +66,8 @@ public class TagController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<ErrorResponse> createGifts(
-            @RequestBody List<TagDto> tagDtoList
+    public ResponseEntity<ErrorResponse> create(
+            @RequestBody TagDto tagDtoList
     ){
         tagService.createTag(tagDtoList);
 
@@ -89,25 +88,6 @@ public class TagController {
             return ResponseEntity.ok(build);
         } catch (TagNotFoundException e){
             ErrorResponse<TagDto> body = ErrorResponse.<TagDto>builder()
-                    .code(Status.TAG_NOT_FOUND.getCode())
-                    .comment(Status.TAG_NOT_FOUND.getMessage()).build();
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
-        }
-    }
-
-    @PostMapping("/tags/{tagId}")
-    public ResponseEntity<ErrorResponse<Set<GiftCertificateDto>>> getGiftTags(
-            @PathVariable Long tagId
-    ) {
-        try {
-            Set<GiftCertificateDto> giftsByTagId = tagService.getGiftsByTagId(tagId);
-
-            ErrorResponse<Set<GiftCertificateDto>> build = ErrorResponse.<Set<GiftCertificateDto>>builder()
-                    .message(giftsByTagId)
-                    .code(Status.SUCCESSFUL.getCode()).build();
-            return ResponseEntity.ok(build);
-        } catch (TagNotFoundException e){
-            ErrorResponse<Set<GiftCertificateDto>> body = ErrorResponse.<Set<GiftCertificateDto>>builder()
                     .code(Status.TAG_NOT_FOUND.getCode())
                     .comment(Status.TAG_NOT_FOUND.getMessage()).build();
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);

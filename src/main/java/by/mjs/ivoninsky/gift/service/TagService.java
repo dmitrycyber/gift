@@ -13,8 +13,7 @@ public interface TagService {
     List<TagDto> getAllTags() throws ServiceException;
     TagDto getTagById(Long tagId) throws ServiceException;
     List<TagDto> getTagByName(String tagName) throws ServiceException;
-    void createTag(List<TagDto> giftCertificateDtoList) throws ServiceException;
-    void deleteTagById(Long tagId) throws ServiceException;
 
-    Set<GiftCertificateDto> getGiftsByTagId(Long tagId) throws ServiceException;
+    TagDto createTag(TagDto tagDto) throws ServiceException;
+    void deleteTagById(Long tagId) throws ServiceException;
 }

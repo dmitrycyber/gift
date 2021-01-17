@@ -15,8 +15,8 @@ public interface GiftService {
 
     List<GiftCertificateDto> searchGifts(CustomSearchRequest customSearchRequest) throws ServiceException;
 
-    void createGift(List<GiftCertificateDto> giftCertificateDtoList) throws ServiceException;
-    void updateGift(GiftCertificateDto giftCertificateDto) throws ServiceException;
+    GiftCertificateDto createGift(GiftCertificateDto giftCertificateDto) throws ServiceException;
+    GiftCertificateDto updateGift(GiftCertificateDto giftCertificateDto) throws ServiceException;
+
     void deleteGiftById(Long giftId) throws ServiceException;
-    Set<TagDto> getTagsByGiftId(Long giftId) throws ServiceException;
 }

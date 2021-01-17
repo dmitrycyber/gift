@@ -17,16 +17,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.ModelAndView;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
-import java.util.Set;
 
-//rest controller
-@Controller
+@RestController
 @RequestMapping("/api/v1/gifts")
-//@RestController()
 public class GiftController {
     private final GiftService giftService;
     private final ObjectMapper objectMapper;
@@ -40,7 +36,7 @@ public class GiftController {
 
     @ExceptionHandler(GiftNotFoundException.class)
     @SneakyThrows
-    public ModelAndView handleError(HttpServletRequest request, HttpServletResponse response, Exception ex) {
+    public void handleError(HttpServletRequest request, HttpServletResponse response, Exception ex) {
         System.out.println("AT URI: " + request.getRequestURI() + " HANDLE EXCEPTION: " + ex);
 
         ErrorResponse<GiftCertificateDto> body = ErrorResponse.<GiftCertificateDto>builder()
@@ -49,88 +45,66 @@ public class GiftController {
 
         response.setStatus(HttpStatus.INSUFFICIENT_STORAGE.value());
         response.getWriter().write(objectMapper.writeValueAsString(body));
-        return new ModelAndView();
+//        return new ModelAndView();
     }
 
 
-    @GetMapping("")
-    //remove custom response
+    @GetMapping
     //add search request too
-    public ResponseEntity<ErrorResponse<List<GiftCertificateDto>>> allGifts() {
+    public ResponseEntity<List<GiftCertificateDto>> allGifts() {
         List<GiftCertificateDto> allGifts = giftService.getAllGifts();
-        ErrorResponse<List<GiftCertificateDto>> build = ErrorResponse.<List<GiftCertificateDto>>builder()
-                .message(allGifts)
-                .code(Status.SUCCESSFUL.getCode()).build();
-        return ResponseEntity.ok(build);
+
+        return ResponseEntity.ok(allGifts);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ErrorResponse<GiftCertificateDto>> giftById(
+    public ResponseEntity<GiftCertificateDto> giftById(
             @PathVariable Long id
     ) {
         GiftCertificateDto giftById = giftService.getGiftById(id);
 
-        ErrorResponse<GiftCertificateDto> build = ErrorResponse.<GiftCertificateDto>builder()
-                .message(giftById)
-                .code(Status.SUCCESSFUL.getCode()).build();
-        return ResponseEntity.ok(build);
+        return ResponseEntity.ok(giftById);
     }
 
-    @PostMapping("/search")
-    public ResponseEntity<ErrorResponse<List<GiftCertificateDto>>> searchGift(
-            @RequestBody CustomSearchRequest customSearchRequest
-    ) {
-
-        List<GiftCertificateDto> giftCertificateDtos = giftService.searchGifts(customSearchRequest);
-
-        ErrorResponse<List<GiftCertificateDto>> build = ErrorResponse.<List<GiftCertificateDto>>builder()
-                .message(giftCertificateDtos)
-                .code(Status.SUCCESSFUL.getCode()).build();
-        return ResponseEntity.ok(build);
-    }
-
-    //save one gift
-    @PostMapping("/create")
-    public ResponseEntity<ErrorResponse> createGifts(
-            @RequestBody List<GiftCertificateDto> giftCertificateDtoList
-    ) {
-        giftService.createGift(giftCertificateDtoList);
-
-        ErrorResponse<Object> build = ErrorResponse.builder()
-                .code(Status.SUCCESSFUL.getCode()).build();
-
-        return ResponseEntity.ok(build);
-    }
-
-    @PostMapping("/update")
-    public ResponseEntity<ErrorResponse> updateGift(
+    @PostMapping
+    public ResponseEntity<GiftCertificateDto> createGift(
             @RequestBody GiftCertificateDto giftCertificateDto
     ) {
-        giftService.updateGift(giftCertificateDto);
-        ErrorResponse<Object> build = ErrorResponse.builder()
-                .code(Status.SUCCESSFUL.getCode()).build();
-        return ResponseEntity.ok(build);
+        System.out.println("CREATE GIFT " + giftCertificateDto);
+
+        GiftCertificateDto gift = giftService.createGift(giftCertificateDto);
+
+        return ResponseEntity.ok(gift);
     }
 
-    @DeleteMapping("/{giftId}")
-    public ResponseEntity<ErrorResponse> deleteGift(
-            @PathVariable Long giftId
+    @PutMapping("/{id}")
+    public ResponseEntity<GiftCertificateDto> updateGift(
+            @RequestBody GiftCertificateDto giftCertificateDto
     ) {
-        giftService.deleteGiftById(giftId);
-        ErrorResponse<Object> build = ErrorResponse.builder()
-                .code(Status.SUCCESSFUL.getCode()).build();
-        return ResponseEntity.ok(build);
+        GiftCertificateDto gift = giftService.updateGift(giftCertificateDto);
+
+        return ResponseEntity.ok(gift);
     }
 
-    @PostMapping("/tags/{giftId}")
-    public ResponseEntity<ErrorResponse<Set<TagDto>>> getGiftTags(
-            @PathVariable Long giftId
+    @DeleteMapping("/{id}")
+    public ResponseEntity deleteGift(
+            @PathVariable Long id
     ) {
-        Set<TagDto> tagsByGiftId = giftService.getTagsByGiftId(giftId);
+        giftService.deleteGiftById(id);
 
-        ErrorResponse<Set<TagDto>> build = ErrorResponse.<Set<TagDto>>builder()
-                .message(tagsByGiftId)
-                .code(Status.SUCCESSFUL.getCode()).build();
-        return ResponseEntity.ok(build);
+        return ResponseEntity.ok().build();
     }
+
+    //    @PostMapping("/search")
+//    public ResponseEntity<ErrorResponse<List<GiftCertificateDto>>> searchGift(
+//            @RequestBody CustomSearchRequest customSearchRequest
+//    ) {
+//
+//        List<GiftCertificateDto> giftCertificateDtos = giftService.searchGifts(customSearchRequest);
+//
+//        ErrorResponse<List<GiftCertificateDto>> build = ErrorResponse.<List<GiftCertificateDto>>builder()
+//                .message(giftCertificateDtos)
+//                .code(Status.SUCCESSFUL.getCode()).build();
+//        return ResponseEntity.ok(build);
+//    }
 }
