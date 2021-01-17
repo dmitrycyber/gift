@@ -1,6 +1,8 @@
 package by.mjs.ivoninsky.gift.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -31,12 +33,8 @@ public class SpringConfig implements WebMvcConfigurer {
 
     @Bean
     public DataSource dataSource() {
-        DriverManagerDataSource dataSource = new DriverManagerDataSource();
-        dataSource.setDriverClassName("org.postgresql.Driver");
-        dataSource.setUrl("jdbc:postgresql://localhost:5432/gift_db");
-        dataSource.setUsername("postgres");
-        dataSource.setPassword("postgres");
-        return dataSource;
+        HikariConfig config = new HikariConfig("/db.properties");
+        return new HikariDataSource(config);
     }
 
     @Bean
