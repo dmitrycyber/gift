@@ -6,7 +6,6 @@ import by.mjs.ivoninsky.gift.dao.TagDao;
 import by.mjs.ivoninsky.gift.dao.exception.GiftNotFoundException;
 import by.mjs.ivoninsky.gift.model.CustomSearchRequest;
 import by.mjs.ivoninsky.gift.model.dto.GiftCertificateDto;
-import by.mjs.ivoninsky.gift.model.dto.TagDto;
 import by.mjs.ivoninsky.gift.model.entity.GiftCertificateEntity;
 import by.mjs.ivoninsky.gift.model.entity.GiftTagEntity;
 import by.mjs.ivoninsky.gift.model.entity.TagEntity;
@@ -39,12 +38,11 @@ public class GiftServiceImpl implements GiftService {
 
     @Override
     public List<GiftCertificateDto> getAllGifts() throws ServiceException {
-        throw new GiftNotFoundException();
-//        List<GiftCertificateDto> giftCertificateDtoList = giftDao.findAllGifts().stream()
-//                .map(EntityConverter::convertGiftEntityDto)
-//                .collect(Collectors.toList());
-//
-//        return giftCertificateDtoList;
+        List<GiftCertificateDto> giftCertificateDtoList = giftDao.findAllGifts().stream()
+                .map(EntityConverter::convertGiftEntityDto)
+                .collect(Collectors.toList());
+
+        return giftCertificateDtoList;
     }
 
     @Override

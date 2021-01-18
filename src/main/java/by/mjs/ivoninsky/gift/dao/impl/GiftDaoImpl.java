@@ -23,8 +23,6 @@ import java.util.Set;
 public class GiftDaoImpl implements GiftDao {
     private final JdbcTemplate jdbcTemplate;
 
-    private static final String COLUMN_ID = "id";
-
     private static final String FIND_ALL_GIFTS_QUERY = "select * from gift_certificate";
     private static final String FIND_GIFT_BY_ID_QUERY = "select * from gift_certificate where id = ?";
     private static final String FIND_GIFT_BY_NAME_QUERY = "select * from gift_certificate where name like ?";
@@ -37,22 +35,34 @@ public class GiftDaoImpl implements GiftDao {
             + "WHERE gt.tag_id = t.id and gt.gift_id=?;";
     private static final String INSERT_GIFT_QUERY = "insert into gift_certificate (name,description,price,duration,create_date,last_update_date) values (?, ?, ?, ?, ?, ?)";
 
+    private static final String ZERO_OR_MORE_ELEMENTS_WILDCARD = "%";
+
+    private static final String COLUMN_ID = "id";
+    private static final String COLUMN_NAME = "name";
+    private static final String COLUMN_DESCRIPTION = "description";
+    private static final String COLUMN_PRICE = "price";
+    private static final String COLUMN_DURATION = "duration";
+    private static final String COLUMN_CREATE_DATE = "create_date";
+    private static final String COLUMN_LAST_UPDATE_DATE = "last_update_date";
+
+
+
 
     RowMapper<GiftCertificateEntity> GIFT_ROW_MAPPER = (ResultSet resultSet, int rowNum) -> {
         return new GiftCertificateEntity(
-                resultSet.getLong("id"),
-                resultSet.getString("name"),
-                resultSet.getString("description"),
-                resultSet.getInt("price"),
-                resultSet.getInt("duration"),
-                resultSet.getTimestamp("create_date"),
-                resultSet.getTimestamp("last_update_date"));
+                resultSet.getLong(COLUMN_ID),
+                resultSet.getString(COLUMN_NAME),
+                resultSet.getString(COLUMN_DESCRIPTION),
+                resultSet.getInt(COLUMN_PRICE),
+                resultSet.getInt(COLUMN_DURATION),
+                resultSet.getTimestamp(COLUMN_CREATE_DATE),
+                resultSet.getTimestamp(COLUMN_LAST_UPDATE_DATE));
     };
 
     RowMapper<TagEntity> TAG_ROW_MAPPER = (ResultSet resultSet, int rowNum) -> {
         return new TagEntity(
-                resultSet.getLong("id"),
-                resultSet.getString("name"));
+                resultSet.getLong(COLUMN_ID),
+                resultSet.getString(COLUMN_NAME));
     };
 
     @Autowired
@@ -87,7 +97,7 @@ public class GiftDaoImpl implements GiftDao {
     @Override
     public List<GiftCertificateEntity> findGiftByName(CustomSearchRequest customSearchRequest) throws DaoException {
         List<GiftCertificateEntity> query = jdbcTemplate.query(FIND_GIFT_BY_NAME_QUERY, GIFT_ROW_MAPPER,
-                "%" + customSearchRequest.getName() + "%");
+                ZERO_OR_MORE_ELEMENTS_WILDCARD + customSearchRequest.getName() + ZERO_OR_MORE_ELEMENTS_WILDCARD);
 
         for (GiftCertificateEntity giftCertificateEntity : query){
             Set<TagEntity> tags = getTagsByGiftId(giftCertificateEntity.getId());
@@ -106,9 +116,6 @@ public class GiftDaoImpl implements GiftDao {
             Set<TagEntity> tags = getTagsByGiftId(giftCertificateEntity.getId());
             giftCertificateEntity.setTags(tags);
         }
-
-        System.out.println("PRICE RESP " + query);
-
         return query;
     }
 

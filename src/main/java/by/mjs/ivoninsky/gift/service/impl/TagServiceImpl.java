@@ -25,13 +25,11 @@ public class TagServiceImpl implements TagService {
 
     @Override
     public List<TagDto> getAllTags() throws ServiceException {
-        throw new TagNotFoundException();
+        List<TagEntity> allTags = tagDao.findAllTags();
 
-//        List<TagEntity> allTags = tagDao.findAllTags();
-//
-//        return allTags.stream()
-//                .map(EntityConverter::convertTagEntityDto)
-//                .collect(Collectors.toList());
+        return allTags.stream()
+                .map(EntityConverter::convertTagEntityDto)
+                .collect(Collectors.toList());
     }
 
     @Override

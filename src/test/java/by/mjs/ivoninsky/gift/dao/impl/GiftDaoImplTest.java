@@ -3,19 +3,15 @@ package by.mjs.ivoninsky.gift.dao.impl;
 import by.mjs.ivoninsky.gift.dao.exception.GiftNotFoundException;
 import by.mjs.ivoninsky.gift.model.CustomSearchRequest;
 import by.mjs.ivoninsky.gift.model.entity.GiftCertificateEntity;
-import by.mjs.ivoninsky.gift.model.entity.TagEntity;
-import org.junit.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
-
 import javax.sql.DataSource;
-
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+import static org.junit.jupiter.api.Assertions.*;
 
-import static org.junit.Assert.*;
 
 public class GiftDaoImplTest {
     private DataSource dataSource;
@@ -24,7 +20,7 @@ public class GiftDaoImplTest {
 
     private GiftDaoImpl giftDao;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         dataSource = new EmbeddedDatabaseBuilder()
                 .addDefaultScripts()
@@ -148,8 +144,8 @@ public class GiftDaoImplTest {
         assertEquals(4, giftDao.findAllGifts().size());
     }
 
-    @Test(expected = GiftNotFoundException.class)
+    @Test
     public void giftNotFoundExceptionCheck(){
-        giftDao.findGiftById(6L);
+        assertThrows(GiftNotFoundException.class, () -> giftDao.findGiftById(6L));
     }
 }

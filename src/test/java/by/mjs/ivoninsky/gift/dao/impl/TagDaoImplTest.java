@@ -1,11 +1,9 @@
 package by.mjs.ivoninsky.gift.dao.impl;
 
-import by.mjs.ivoninsky.gift.dao.exception.GiftNotFoundException;
 import by.mjs.ivoninsky.gift.dao.exception.TagNotFoundException;
-import by.mjs.ivoninsky.gift.model.entity.GiftCertificateEntity;
 import by.mjs.ivoninsky.gift.model.entity.TagEntity;
-import junit.framework.TestCase;
-import org.junit.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
@@ -13,8 +11,7 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 import javax.sql.DataSource;
 import java.util.List;
 
-import static org.junit.Assert.*;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class TagDaoImplTest {
     private DataSource dataSource;
@@ -23,7 +20,7 @@ public class TagDaoImplTest {
 
     private TagDaoImpl tagDao;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         dataSource = new EmbeddedDatabaseBuilder()
                 .addDefaultScripts()
@@ -106,8 +103,8 @@ public class TagDaoImplTest {
         assertEquals(4, tagDao.findAllTags().size());
     }
 
-    @Test(expected = TagNotFoundException.class)
+    @Test
     public void giftNotFoundExceptionCheck(){
-        tagDao.findTagById(6L);
+        assertThrows(TagNotFoundException.class, () -> tagDao.findTagById(6L));
     }
 }
