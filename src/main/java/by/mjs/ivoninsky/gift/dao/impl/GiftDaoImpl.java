@@ -140,7 +140,6 @@ public class GiftDaoImpl implements GiftDao {
                     ps.setTimestamp(5, currentTimestamp);
                     ps.setTimestamp(6, currentTimestamp);
 
-
                     return ps;
                 },
                 keyHolder);

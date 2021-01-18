@@ -3,6 +3,7 @@ package by.mjs.ivoninsky.gift.dao.impl;
 import by.mjs.ivoninsky.gift.dao.exception.GiftNotFoundException;
 import by.mjs.ivoninsky.gift.model.CustomSearchRequest;
 import by.mjs.ivoninsky.gift.model.entity.GiftCertificateEntity;
+import by.mjs.ivoninsky.gift.model.entity.TagEntity;
 import org.junit.*;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
@@ -10,7 +11,9 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 
 import javax.sql.DataSource;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.Assert.*;
 
@@ -110,7 +113,7 @@ public class GiftDaoImplTest {
     }
 
     @Test
-    public void createGift() {
+    public void createGiftWithoutTags() {
         GiftCertificateEntity entityToSave = GiftCertificateEntity.builder()
                 .name("testName")
                 .description("testDescription")
