@@ -19,40 +19,33 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/gifts")
 public class GiftController {
     private final GiftService giftService;
-    private final ObjectMapper objectMapper;
+
 
     @Autowired
-    public GiftController(GiftService giftService, ObjectMapper objectMapper) {
+    public GiftController(GiftService giftService) {
         this.giftService = giftService;
-        this.objectMapper = objectMapper;
-    }
-
-
-    @ExceptionHandler(GiftNotFoundException.class)
-    @SneakyThrows
-    public void handleError(HttpServletRequest request, HttpServletResponse response, Exception ex) {
-        System.out.println("AT URI: " + request.getRequestURI() + " HANDLE EXCEPTION: " + ex);
-
-        ErrorResponse<GiftCertificateDto> body = ErrorResponse.<GiftCertificateDto>builder()
-                .code(Status.GIFT_NOT_FOUND.getCode())
-                .comment(Status.GIFT_NOT_FOUND.getMessage()).build();
-
-        response.setStatus(HttpStatus.INSUFFICIENT_STORAGE.value());
-        response.getWriter().write(objectMapper.writeValueAsString(body));
-//        return new ModelAndView();
     }
 
 
     @GetMapping
     //add search request too
-    public ResponseEntity<List<GiftCertificateDto>> allGifts() {
-        List<GiftCertificateDto> allGifts = giftService.getAllGifts();
+    public ResponseEntity<List<GiftCertificateDto>> allGifts(CustomSearchRequest customSearchRequest) {
+        System.out.println("CUSTOM SEARCH REQUEST " + customSearchRequest);
+        List<GiftCertificateDto> allGifts;
+
+        if (!customSearchRequest.equals(CustomSearchRequest.builder().build())){
+            allGifts = giftService.searchGifts(customSearchRequest);
+        }
+        else {
+            allGifts = giftService.getAllGifts();
+        }
 
         return ResponseEntity.ok(allGifts);
     }
@@ -79,8 +72,12 @@ public class GiftController {
 
     @PutMapping("/{id}")
     public ResponseEntity<GiftCertificateDto> updateGift(
-            @RequestBody GiftCertificateDto giftCertificateDto
+            @RequestBody GiftCertificateDto giftCertificateDto,
+            @PathVariable Long id
+
     ) {
+        giftCertificateDto.setId(id);
+
         GiftCertificateDto gift = giftService.updateGift(giftCertificateDto);
 
         return ResponseEntity.ok(gift);

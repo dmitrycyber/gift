@@ -1,6 +1,8 @@
 package by.mjs.ivoninsky.gift.service.impl;
 
 import by.mjs.ivoninsky.gift.dao.TagDao;
+import by.mjs.ivoninsky.gift.dao.exception.GiftNotFoundException;
+import by.mjs.ivoninsky.gift.dao.exception.TagNotFoundException;
 import by.mjs.ivoninsky.gift.model.dto.TagDto;
 import by.mjs.ivoninsky.gift.model.entity.TagEntity;
 import by.mjs.ivoninsky.gift.service.TagService;
@@ -23,13 +25,13 @@ public class TagServiceImpl implements TagService {
 
     @Override
     public List<TagDto> getAllTags() throws ServiceException {
+        throw new TagNotFoundException();
 
-
-        List<TagEntity> allTags = tagDao.findAllTags();
-
-        return allTags.stream()
-                .map(EntityConverter::convertTagEntityDto)
-                .collect(Collectors.toList());
+//        List<TagEntity> allTags = tagDao.findAllTags();
+//
+//        return allTags.stream()
+//                .map(EntityConverter::convertTagEntityDto)
+//                .collect(Collectors.toList());
     }
 
     @Override
@@ -40,6 +42,15 @@ public class TagServiceImpl implements TagService {
     @Override
     public List<TagDto> getTagByName(String tagName) throws ServiceException {
         List<TagEntity> tagByName = tagDao.findTagByName(tagName);
+
+        return tagByName.stream()
+                .map(EntityConverter::convertTagEntityDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<TagDto> getTagByPartName(String tagName) throws ServiceException {
+        List<TagEntity> tagByName = tagDao.findTagByPartName(tagName);
 
         return tagByName.stream()
                 .map(EntityConverter::convertTagEntityDto)

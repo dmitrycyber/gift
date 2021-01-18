@@ -2,6 +2,8 @@ package by.mjs.ivoninsky.gift.dao.impl;
 
 import by.mjs.ivoninsky.gift.dao.GiftDao;
 import by.mjs.ivoninsky.gift.dao.exception.DaoException;
+import by.mjs.ivoninsky.gift.dao.exception.GiftNotFoundException;
+import by.mjs.ivoninsky.gift.model.CustomSearchRequest;
 import by.mjs.ivoninsky.gift.model.entity.GiftCertificateEntity;
 import by.mjs.ivoninsky.gift.model.entity.GiftTagEntity;
 import by.mjs.ivoninsky.gift.model.entity.TagEntity;
@@ -22,16 +24,17 @@ public class GiftDaoImpl implements GiftDao {
     private final JdbcTemplate jdbcTemplate;
 
     private static final String COLUMN_ID = "id";
+
     private static final String FIND_ALL_GIFTS_QUERY = "select * from gift_certificate";
     private static final String FIND_GIFT_BY_ID_QUERY = "select * from gift_certificate where id = ?";
-    private static final String FIND_GIFT_TAG_BY_GIFT_ID_QUERY = "select * from gift_tags where gift_id = ?";
-    private static final String FIND_TAG_BY_ID_QUERY = "select * from tag where id = ?";
-
-
+    private static final String FIND_GIFT_BY_NAME_QUERY = "select * from gift_certificate where name like ?";
+    private static final String FIND_GIFT_BY_PRICE_QUERY = "select * from gift_certificate where price >= ? and price <= ?";
+    private static final String FIND_GIFT_BY_DURATION_QUERY = "select * from gift_certificate where duration >= ? and duration <= ?";
+    private static final String DELETE_GIFT_BY_ID = "delete from gift_certificate where id = ?";
+    private static final String UPDATE_BY_ID_QUERY = "UPDATE gift_certificate set name=?, description=?, price=?, duration=? WHERE id=?;";
     private static final String SELECT_TAGS_BY_GIFT = "SELECT t.id, t.name "
             + "FROM gift_tags gt, tag t "
             + "WHERE gt.tag_id = t.id and gt.gift_id=?;";
-
     private static final String INSERT_GIFT_QUERY = "insert into gift_certificate (name,description,price,duration,create_date,last_update_date) values (?, ?, ?, ?, ?, ?)";
 
 
@@ -51,11 +54,6 @@ public class GiftDaoImpl implements GiftDao {
                 resultSet.getLong("id"),
                 resultSet.getString("name"));
     };
-
-
-
-
-
 
     @Autowired
     public GiftDaoImpl(JdbcTemplate jdbcTemplate) {
@@ -77,15 +75,54 @@ public class GiftDaoImpl implements GiftDao {
 
     @Override
     public GiftCertificateEntity findGiftById(Long giftId) throws DaoException {
+        List<GiftCertificateEntity> query = jdbcTemplate.query(FIND_GIFT_BY_ID_QUERY, GIFT_ROW_MAPPER, giftId);
 
-        GiftCertificateEntity entity = jdbcTemplate.queryForObject(FIND_GIFT_BY_ID_QUERY, GIFT_ROW_MAPPER, giftId);
+        if (query.size() != 1){
+            throw new GiftNotFoundException();
+        }
 
-        return entity;
+        return query.get(0);
     }
 
     @Override
-    public GiftCertificateEntity findGiftByName(String giftName) throws DaoException {
-        return null;
+    public List<GiftCertificateEntity> findGiftByName(CustomSearchRequest customSearchRequest) throws DaoException {
+        List<GiftCertificateEntity> query = jdbcTemplate.query(FIND_GIFT_BY_NAME_QUERY, GIFT_ROW_MAPPER,
+                "%" + customSearchRequest.getName() + "%");
+
+        for (GiftCertificateEntity giftCertificateEntity : query){
+            Set<TagEntity> tags = getTagsByGiftId(giftCertificateEntity.getId());
+            giftCertificateEntity.setTags(tags);
+        }
+
+        return query;
+    }
+
+    @Override
+    public List<GiftCertificateEntity> findGiftByPrice(CustomSearchRequest customSearchRequest) throws DaoException {
+        List<GiftCertificateEntity> query = jdbcTemplate.query(FIND_GIFT_BY_PRICE_QUERY, GIFT_ROW_MAPPER,
+                customSearchRequest.getPriceFrom(), customSearchRequest.getPriceTo());
+
+        for (GiftCertificateEntity giftCertificateEntity : query){
+            Set<TagEntity> tags = getTagsByGiftId(giftCertificateEntity.getId());
+            giftCertificateEntity.setTags(tags);
+        }
+
+        System.out.println("PRICE RESP " + query);
+
+        return query;
+    }
+
+    @Override
+    public List<GiftCertificateEntity> findGiftByDuration(CustomSearchRequest customSearchRequest) throws DaoException {
+        List<GiftCertificateEntity> query = jdbcTemplate.query(FIND_GIFT_BY_DURATION_QUERY, GIFT_ROW_MAPPER,
+                customSearchRequest.getDurationFrom(), customSearchRequest.getDurationTo());
+
+        for (GiftCertificateEntity giftCertificateEntity : query){
+            Set<TagEntity> tags = getTagsByGiftId(giftCertificateEntity.getId());
+            giftCertificateEntity.setTags(tags);
+        }
+
+        return query;
     }
 
     @Override
@@ -120,32 +157,29 @@ public class GiftDaoImpl implements GiftDao {
 
     @Override
     public GiftCertificateEntity updateGift(GiftCertificateEntity giftCertificateEntity) throws DaoException {
-        return null;
+        Timestamp currentTimestamp = new Timestamp(System.currentTimeMillis());
+        int rows = jdbcTemplate.update(UPDATE_BY_ID_QUERY,
+                giftCertificateEntity.getName(),
+                giftCertificateEntity.getDescription(),
+                giftCertificateEntity.getPrice(),
+                giftCertificateEntity.getDuration(),
+                giftCertificateEntity.getId());
+
+        if (rows == 0){
+            throw new GiftNotFoundException();
+        }
+
+        giftCertificateEntity.setLastUpdateDate(currentTimestamp);
+
+        return giftCertificateEntity;
     }
 
     @Override
     public void deleteGiftById(Long giftId) throws DaoException {
-
+        jdbcTemplate.update(DELETE_GIFT_BY_ID, giftId);
     }
 
     private Set<TagEntity> getTagsByGiftId(Long giftId){
-//        List<GiftTagEntity> query = jdbcTemplate.query(FIND_GIFT_TAG_BY_GIFT_ID_QUERY, GIFT_TAG_ROW_MAPPER, giftId);
-//        Set<GiftTagEntity> giftTagEntities = new HashSet<>(query);
-//
-//        Set<TagEntity> tags = new HashSet<>();
-//
-//        if (!giftTagEntities.isEmpty()){
-//            for (GiftTagEntity giftTagEntity : giftTagEntities){
-//                Long tag_id = giftTagEntity.getTag_id();
-//                System.out.println("TAG ID " + tag_id);
-//
-//                TagEntity tagEntity = jdbcTemplate.queryForObject(FIND_TAG_BY_ID_QUERY, TAG_ROW_MAPPER, tag_id);
-//
-//                tags.add(tagEntity);
-//
-//                System.out.println("TAG ENTITY " + tagEntity);
-//            }
-//        }
         List<TagEntity> queryTags = jdbcTemplate.query(SELECT_TAGS_BY_GIFT, TAG_ROW_MAPPER, giftId);
 
         return new HashSet<>(queryTags);

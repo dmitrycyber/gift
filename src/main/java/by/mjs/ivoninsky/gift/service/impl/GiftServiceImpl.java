@@ -3,6 +3,7 @@ package by.mjs.ivoninsky.gift.service.impl;
 import by.mjs.ivoninsky.gift.dao.GiftDao;
 import by.mjs.ivoninsky.gift.dao.GiftTagDao;
 import by.mjs.ivoninsky.gift.dao.TagDao;
+import by.mjs.ivoninsky.gift.dao.exception.GiftNotFoundException;
 import by.mjs.ivoninsky.gift.model.CustomSearchRequest;
 import by.mjs.ivoninsky.gift.model.dto.GiftCertificateDto;
 import by.mjs.ivoninsky.gift.model.dto.TagDto;
@@ -17,6 +18,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -37,23 +39,37 @@ public class GiftServiceImpl implements GiftService {
 
     @Override
     public List<GiftCertificateDto> getAllGifts() throws ServiceException {
-        List<GiftCertificateDto> giftCertificateDtoList = giftDao.findAllGifts().stream()
-                .map(EntityConverter::convertGiftEntityDto)
-                .collect(Collectors.toList());
-
-        return giftCertificateDtoList;
+        throw new GiftNotFoundException();
+//        List<GiftCertificateDto> giftCertificateDtoList = giftDao.findAllGifts().stream()
+//                .map(EntityConverter::convertGiftEntityDto)
+//                .collect(Collectors.toList());
+//
+//        return giftCertificateDtoList;
     }
 
     @Override
     public GiftCertificateDto getGiftById(Long giftId) throws ServiceException {
         return EntityConverter.convertGiftEntityDto(giftDao.findGiftById(giftId));
-//        throw new ServiceException();
     }
 
     @Override
     public List<GiftCertificateDto> searchGifts(CustomSearchRequest customSearchRequest) throws ServiceException {
-        //TODO add logic, delete getByName from DAO
-        return null;
+        List<GiftCertificateEntity> giftList = new ArrayList<>();
+
+        if (customSearchRequest.getName() != null){
+            giftList = giftDao.findGiftByName(customSearchRequest);
+
+        }
+        if (customSearchRequest.getDurationFrom() != null && customSearchRequest.getDurationTo() != null){
+            giftList = giftDao.findGiftByDuration(customSearchRequest);
+        }
+        if (customSearchRequest.getPriceFrom() != null && customSearchRequest.getPriceTo() != null){
+            giftList = giftDao.findGiftByPrice(customSearchRequest);
+        }
+
+        return giftList.stream()
+                .map(EntityConverter::convertGiftEntityDto)
+                .collect(Collectors.toList());
     }
 
     @Override

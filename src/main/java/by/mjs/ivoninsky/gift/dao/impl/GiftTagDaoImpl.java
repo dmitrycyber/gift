@@ -34,16 +34,5 @@ public class GiftTagDaoImpl implements GiftTagDao {
     @Override
     public void insertNewGiftTagEntity(GiftTagEntity giftTagEntity) {
         jdbcTemplate.update(INSERT_GIFT_TAG_QUERY, giftTagEntity.getGiftId(), giftTagEntity.getTagId());
-//        KeyHolder keyHolder = new GeneratedKeyHolder();
-//        jdbcTemplate.update(
-//                connection -> {
-//                    PreparedStatement ps =
-//                            connection.prepareStatement(INSERT_GIFT_TAG_QUERY, new String[] {COLUMN_ID});
-//                    ps.setLong(1, giftTagEntity.getGiftId());
-//                    ps.setLong(2, giftTagEntity.getTagId());
-//                    return ps;
-//                },
-//                keyHolder);
-
     }
 }

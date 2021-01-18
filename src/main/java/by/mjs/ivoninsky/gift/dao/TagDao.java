@@ -13,9 +13,10 @@ public interface TagDao {
     List<TagEntity> findAllTags() throws DaoException;
     TagEntity findTagById(Long tagId) throws DaoException;
     List<TagEntity> findTagByName(String tagName) throws DaoException;
+    List<TagEntity> findTagByPartName(String tagName) throws DaoException;
 
     TagEntity createTag(TagEntity tagEntity) throws DaoException;
-    TagEntity deleteTagById(Long tagId) throws DaoException;
+    void deleteTagById(Long tagId) throws DaoException;
 
 
 }
