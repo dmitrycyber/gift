@@ -11,14 +11,14 @@ import java.util.List;
 import java.util.Set;
 
 public interface GiftDao {
-    List<GiftCertificateEntity> findAllGifts() throws DaoException;
+    List<GiftCertificateEntity> findAllGifts();
     GiftCertificateEntity findGiftById(Long giftId) throws DaoException;
-    List<GiftCertificateEntity> findGiftByName(CustomSearchRequest customSearchRequest) throws DaoException;
-    List<GiftCertificateEntity> findGiftByPrice(CustomSearchRequest customSearchRequest) throws DaoException;
-    List<GiftCertificateEntity> findGiftByDuration(CustomSearchRequest customSearchRequest) throws DaoException;
+    List<GiftCertificateEntity> findAndSortGift(CustomSearchRequest customSearchRequest);
+//    List<GiftCertificateEntity> findGiftByPrice(CustomSearchRequest customSearchRequest) throws DaoException;
+//    List<GiftCertificateEntity> findGiftByDuration(CustomSearchRequest customSearchRequest) throws DaoException;
 
-    GiftCertificateEntity createGift(GiftCertificateEntity giftCertificateEntity) throws DaoException;
-    GiftCertificateEntity updateGift(GiftCertificateEntity giftCertificateEntity) throws DaoException;
+    GiftCertificateEntity createGift(GiftCertificateEntity giftCertificateEntity);
+    GiftCertificateEntity updateGift(GiftCertificateEntity giftCertificateEntity);
 
-    void deleteGiftById(Long giftId) throws DaoException;
+    void deleteGiftById(Long giftId);
 }

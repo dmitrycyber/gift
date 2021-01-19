@@ -52,12 +52,12 @@ public class TagDaoImpl implements TagDao {
 
 
     @Override
-    public List<TagEntity> findAllTags() throws DaoException {
+    public List<TagEntity> findAllTags(){
         return jdbcTemplate.query(FIND_ALL_TAGS_QUERY, TAG_ROW_MAPPER);
     }
 
     @Override
-    public TagEntity findTagById(Long tagId) throws DaoException {
+    public TagEntity findTagById(Long tagId){
         List<TagEntity> query = jdbcTemplate.query(FIND_TAG_BY_ID_QUERY, TAG_ROW_MAPPER, tagId);
 
         if (query.size() != DEFAULT_TAG_LIST_SIZE) {
@@ -68,19 +68,19 @@ public class TagDaoImpl implements TagDao {
     }
 
     @Override
-    public List<TagEntity> findTagByName(String tagName) throws DaoException {
+    public List<TagEntity> findTagByName(String tagName){
         return jdbcTemplate.query(SELECT_TAGS_BY_NAME, TAG_ROW_MAPPER, tagName);
     }
 
     @Override
-    public List<TagEntity> findTagByPartName(String tagName) throws DaoException {
+    public List<TagEntity> findTagByPartName(String tagName){
         return jdbcTemplate.query(SELECT_TAGS_BY_PART_NAME,
                 TAG_ROW_MAPPER,
                 ZERO_OR_MORE_ELEMENTS_WILDCARD + tagName + ZERO_OR_MORE_ELEMENTS_WILDCARD);
     }
 
     @Override
-    public TagEntity createTag(TagEntity tagEntity) throws DaoException {
+    public TagEntity createTag(TagEntity tagEntity){
         List<TagEntity> tagByPartName = findTagByName(tagEntity.getName());
 
         if (!tagByPartName.isEmpty()) {
@@ -106,7 +106,7 @@ public class TagDaoImpl implements TagDao {
     }
 
     @Override
-    public void deleteTagById(Long tagId) throws DaoException {
+    public void deleteTagById(Long tagId){
         jdbcTemplate.update(DELETE_TAG_BY_ID, tagId);
     }
 }

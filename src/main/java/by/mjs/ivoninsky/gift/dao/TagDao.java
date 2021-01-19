@@ -10,13 +10,13 @@ import java.util.List;
 import java.util.Set;
 
 public interface TagDao {
-    List<TagEntity> findAllTags() throws DaoException;
-    TagEntity findTagById(Long tagId) throws DaoException;
-    List<TagEntity> findTagByName(String tagName) throws DaoException;
-    List<TagEntity> findTagByPartName(String tagName) throws DaoException;
+    List<TagEntity> findAllTags();
+    TagEntity findTagById(Long tagId);
+    List<TagEntity> findTagByName(String tagName);
+    List<TagEntity> findTagByPartName(String tagName);
 
-    TagEntity createTag(TagEntity tagEntity) throws DaoException;
-    void deleteTagById(Long tagId) throws DaoException;
+    TagEntity createTag(TagEntity tagEntity);
+    void deleteTagById(Long tagId);
 
 
 }

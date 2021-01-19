@@ -7,6 +7,7 @@ import by.mjs.ivoninsky.gift.model.dto.TagDto;
 import by.mjs.ivoninsky.gift.service.TagService;
 import by.mjs.ivoninsky.gift.dao.exception.TagNotFoundException;
 import by.mjs.ivoninsky.gift.util.Status;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +28,7 @@ public class TagController {
     }
 
     @GetMapping
+    @ApiOperation(value = "Api v1. Get all tags")
     public ResponseEntity<List<TagDto>> allTags(@RequestParam(required = false) String name) {
         List<TagDto> tags;
 
@@ -39,6 +41,7 @@ public class TagController {
     }
 
     @GetMapping("/{id}")
+    @ApiOperation(value = "Api v1. Get tag by id")
     public ResponseEntity<TagDto> tagById(
             @PathVariable Long id
     ) {
@@ -46,7 +49,8 @@ public class TagController {
         return ResponseEntity.ok(tagById);
     }
 
-    @PostMapping("/{id}")
+    @PostMapping
+    @ApiOperation(value = "Api v1. Create tag")
     public ResponseEntity<TagDto> create(
             @RequestBody TagDto tagDto
     ) {
@@ -56,6 +60,7 @@ public class TagController {
     }
 
     @DeleteMapping("/{id}")
+    @ApiOperation(value = "Api v1. Delete tag by id")
     public ResponseEntity<ErrorResponse> deleteGift(
             @PathVariable Long id
     ) {

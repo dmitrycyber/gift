@@ -10,13 +10,13 @@ import java.util.List;
 import java.util.Set;
 
 public interface GiftService {
-    List<GiftCertificateDto> getAllGifts() throws ServiceException;
-    GiftCertificateDto getGiftById(Long giftId) throws ServiceException;
+    List<GiftCertificateDto> getAllGifts();
+    GiftCertificateDto getGiftById(Long giftId);
 
-    List<GiftCertificateDto> searchGifts(CustomSearchRequest customSearchRequest) throws ServiceException;
+    List<GiftCertificateDto> searchGifts(CustomSearchRequest customSearchRequest);
 
-    GiftCertificateDto createGift(GiftCertificateDto giftCertificateDto) throws ServiceException;
-    GiftCertificateDto updateGift(GiftCertificateDto giftCertificateDto) throws ServiceException;
+    GiftCertificateDto createGift(GiftCertificateDto giftCertificateDto);
+    GiftCertificateDto updateGift(GiftCertificateDto giftCertificateDto);
 
-    void deleteGiftById(Long giftId) throws ServiceException;
+    void deleteGiftById(Long giftId);
 }

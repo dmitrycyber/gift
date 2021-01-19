@@ -12,11 +12,9 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CustomSearchRequest implements Serializable {
-    private String name;
-
-    private Integer priceFrom;
-    private Integer priceTo;
-
-    private Integer durationFrom;
-    private Integer durationTo;
+    private String namePrefix;
+    private String descriptionPrefix;
+    private String tagNamePrefix;
+    private String sortField;
+    private String sortMethod;
 }

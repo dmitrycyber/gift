@@ -3,10 +3,11 @@ package by.mjs.ivoninsky.gift.dao.impl;
 import by.mjs.ivoninsky.gift.dao.GiftDao;
 import by.mjs.ivoninsky.gift.dao.exception.DaoException;
 import by.mjs.ivoninsky.gift.dao.exception.GiftNotFoundException;
+import by.mjs.ivoninsky.gift.dao.model.QueryArgModel;
 import by.mjs.ivoninsky.gift.model.CustomSearchRequest;
 import by.mjs.ivoninsky.gift.model.entity.GiftCertificateEntity;
-import by.mjs.ivoninsky.gift.model.entity.GiftTagEntity;
 import by.mjs.ivoninsky.gift.model.entity.TagEntity;
+import by.mjs.ivoninsky.gift.util.SearchConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -25,9 +26,39 @@ public class GiftDaoImpl implements GiftDao {
 
     private static final String FIND_ALL_GIFTS_QUERY = "select * from gift_certificate";
     private static final String FIND_GIFT_BY_ID_QUERY = "select * from gift_certificate where id = ?";
-    private static final String FIND_GIFT_BY_NAME_QUERY = "select * from gift_certificate where name like ?";
-    private static final String FIND_GIFT_BY_PRICE_QUERY = "select * from gift_certificate where price >= ? and price <= ?";
-    private static final String FIND_GIFT_BY_DURATION_QUERY = "select * from gift_certificate where duration >= ? and duration <= ?";
+
+
+
+    private static final String BY_NAME = " where name like ?";
+    private static final String BY_DESCRIPTION = " where description like ?";
+    private static final String BY_NAME_AND_DESCRIPTION = " where name like ? and description like ?";
+
+
+    private static final String SELECT_GIFT_BY_NAME = FIND_ALL_GIFTS_QUERY + BY_NAME;
+    private static final String SELECT_GIFT_BY_DESCRIPTION = FIND_ALL_GIFTS_QUERY + BY_DESCRIPTION;
+    private static final String SELECT_GIFT_BY_NAME_AND_DESCRIPTION = FIND_ALL_GIFTS_QUERY + BY_NAME_AND_DESCRIPTION;
+
+    private static final String SELECT_GIFT_BY_TAG_NAME = "SELECT gc.id, gc.name, gc.description, gc.price, gc.duration, gc.create_date, gc.last_update_date "
+            + "FROM gift_certificate gc, gift_tags gt, tag t "
+            + "WHERE gc.id = gt.gift_id and gt.tag_id = t.id and t.name like ?";
+
+    private static final String SELECT_GIFT_BY_TAG_NAME_AND_GIFT_NAME = "SELECT gc.id, gc.name, gc.description, gc.price, gc.duration, gc.create_date, gc.last_update_date "
+            + "FROM gift_certificate gc, gift_tags gt, tag t "
+            + "WHERE gc.id = gt.gift_id and gt.tag_id = t.id and gc.name like ? and t.name like ?";
+
+    private static final String SELECT_GIFT_BY_TAG_NAME_AND_GIFT_DESCRIPTION = "SELECT gc.id, gc.name, gc.description, gc.price, gc.duration, gc.create_date, gc.last_update_date "
+            + "FROM gift_certificate gc, gift_tags gt, tag t "
+            + "WHERE gc.id = gt.gift_id and gt.tag_id = t.id and gc.description like ? and t.name like ?";
+
+    private static final String SELECT_GIFT_BY_TAG_NAME_AND_GIFT_NAME_AND_DESCRIPTION = "SELECT gc.id, gc.name, gc.description, gc.price, gc.duration, gc.create_date, gc.last_update_date "
+            + "FROM gift_certificate gc, gift_tags gt, tag t "
+            + "WHERE gc.id = gt.gift_id and gt.tag_id = t.id and gc.name like ? and gc.description like ? and t.name like ?";
+
+
+    private static final String SORT_BY_CREATE_DATE_ASC = " order by create_date asc";
+    private static final String SORT_BY_CREATE_DATE_DESC = " order by create_date desc";
+    private static final String SORT_BY_NAME_ASC = " order by name asc";
+    private static final String SORT_BY_NAME_DESC = " order by name desc";
     private static final String DELETE_GIFT_BY_ID = "delete from gift_certificate where id = ?";
     private static final String UPDATE_BY_ID_QUERY = "UPDATE gift_certificate set name=?, description=?, price=?, duration=? WHERE id=?;";
     private static final String SELECT_TAGS_BY_GIFT = "SELECT t.id, t.name "
@@ -72,7 +103,7 @@ public class GiftDaoImpl implements GiftDao {
 
 
     @Override
-    public List<GiftCertificateEntity> findAllGifts() throws DaoException {
+    public List<GiftCertificateEntity> findAllGifts(){
         List<GiftCertificateEntity> query = jdbcTemplate.query(FIND_ALL_GIFTS_QUERY, GIFT_ROW_MAPPER);
 
         for (GiftCertificateEntity giftCertificateEntity : query){
@@ -84,7 +115,7 @@ public class GiftDaoImpl implements GiftDao {
     }
 
     @Override
-    public GiftCertificateEntity findGiftById(Long giftId) throws DaoException {
+    public GiftCertificateEntity findGiftById(Long giftId){
         List<GiftCertificateEntity> query = jdbcTemplate.query(FIND_GIFT_BY_ID_QUERY, GIFT_ROW_MAPPER, giftId);
 
         if (query.size() != 1){
@@ -95,22 +126,12 @@ public class GiftDaoImpl implements GiftDao {
     }
 
     @Override
-    public List<GiftCertificateEntity> findGiftByName(CustomSearchRequest customSearchRequest) throws DaoException {
-        List<GiftCertificateEntity> query = jdbcTemplate.query(FIND_GIFT_BY_NAME_QUERY, GIFT_ROW_MAPPER,
-                ZERO_OR_MORE_ELEMENTS_WILDCARD + customSearchRequest.getName() + ZERO_OR_MORE_ELEMENTS_WILDCARD);
+    public List<GiftCertificateEntity> findAndSortGift(CustomSearchRequest customSearchRequest){
+        QueryArgModel queryArgModel = defineQueryAndArgs(customSearchRequest);
+        String queryString = queryArgModel.getQuery();
+        Object[] args = queryArgModel.getArgs();
 
-        for (GiftCertificateEntity giftCertificateEntity : query){
-            Set<TagEntity> tags = getTagsByGiftId(giftCertificateEntity.getId());
-            giftCertificateEntity.setTags(tags);
-        }
-
-        return query;
-    }
-
-    @Override
-    public List<GiftCertificateEntity> findGiftByPrice(CustomSearchRequest customSearchRequest) throws DaoException {
-        List<GiftCertificateEntity> query = jdbcTemplate.query(FIND_GIFT_BY_PRICE_QUERY, GIFT_ROW_MAPPER,
-                customSearchRequest.getPriceFrom(), customSearchRequest.getPriceTo());
+        List<GiftCertificateEntity> query = jdbcTemplate.query(queryString, GIFT_ROW_MAPPER, args);
 
         for (GiftCertificateEntity giftCertificateEntity : query){
             Set<TagEntity> tags = getTagsByGiftId(giftCertificateEntity.getId());
@@ -120,20 +141,7 @@ public class GiftDaoImpl implements GiftDao {
     }
 
     @Override
-    public List<GiftCertificateEntity> findGiftByDuration(CustomSearchRequest customSearchRequest) throws DaoException {
-        List<GiftCertificateEntity> query = jdbcTemplate.query(FIND_GIFT_BY_DURATION_QUERY, GIFT_ROW_MAPPER,
-                customSearchRequest.getDurationFrom(), customSearchRequest.getDurationTo());
-
-        for (GiftCertificateEntity giftCertificateEntity : query){
-            Set<TagEntity> tags = getTagsByGiftId(giftCertificateEntity.getId());
-            giftCertificateEntity.setTags(tags);
-        }
-
-        return query;
-    }
-
-    @Override
-    public GiftCertificateEntity createGift(GiftCertificateEntity entity) throws DaoException {
+    public GiftCertificateEntity createGift(GiftCertificateEntity entity){
         KeyHolder keyHolder = new GeneratedKeyHolder();
         Timestamp currentTimestamp = new Timestamp(System.currentTimeMillis());
         jdbcTemplate.update(
@@ -162,7 +170,7 @@ public class GiftDaoImpl implements GiftDao {
     }
 
     @Override
-    public GiftCertificateEntity updateGift(GiftCertificateEntity giftCertificateEntity) throws DaoException {
+    public GiftCertificateEntity updateGift(GiftCertificateEntity giftCertificateEntity){
         Timestamp currentTimestamp = new Timestamp(System.currentTimeMillis());
         int rows = jdbcTemplate.update(UPDATE_BY_ID_QUERY,
                 giftCertificateEntity.getName(),
@@ -181,7 +189,7 @@ public class GiftDaoImpl implements GiftDao {
     }
 
     @Override
-    public void deleteGiftById(Long giftId) throws DaoException {
+    public void deleteGiftById(Long giftId){
         jdbcTemplate.update(DELETE_GIFT_BY_ID, giftId);
     }
 
@@ -189,6 +197,85 @@ public class GiftDaoImpl implements GiftDao {
         List<TagEntity> queryTags = jdbcTemplate.query(SELECT_TAGS_BY_GIFT, TAG_ROW_MAPPER, giftId);
 
         return new HashSet<>(queryTags);
+    }
+
+    private QueryArgModel defineQueryAndArgs(CustomSearchRequest customSearchRequest){
+        String namePrefix = customSearchRequest.getNamePrefix();
+        String descriptionPrefix = customSearchRequest.getDescriptionPrefix();
+        String tagNamePrefix = customSearchRequest.getTagNamePrefix();
+        String sortField = customSearchRequest.getSortField();
+        String sortMethod = customSearchRequest.getSortMethod();
+        Object[] args = new Object[0];
+
+
+        String namePrefixWithWildCard = ZERO_OR_MORE_ELEMENTS_WILDCARD + namePrefix + ZERO_OR_MORE_ELEMENTS_WILDCARD;
+        String descriptionPrefixWithWildCard = ZERO_OR_MORE_ELEMENTS_WILDCARD + descriptionPrefix + ZERO_OR_MORE_ELEMENTS_WILDCARD;
+        String tagNamePrefixWithWildCard = ZERO_OR_MORE_ELEMENTS_WILDCARD + tagNamePrefix + ZERO_OR_MORE_ELEMENTS_WILDCARD;
+
+        StringBuilder query = new StringBuilder();
+
+        if (namePrefix != null && descriptionPrefix == null && tagNamePrefix == null){
+            query.append(SELECT_GIFT_BY_NAME);
+            args = new Object[1];
+            args[0] = namePrefixWithWildCard;
+        }
+        if (namePrefix == null && descriptionPrefix != null && tagNamePrefix == null){
+            query.append(SELECT_GIFT_BY_DESCRIPTION);
+            args = new Object[1];
+            args[0] = descriptionPrefixWithWildCard;
+        }
+        if (namePrefix == null && descriptionPrefix == null && tagNamePrefix != null){
+            query.append(SELECT_GIFT_BY_TAG_NAME);
+            args = new Object[1];
+            args[0] = tagNamePrefixWithWildCard;
+        }
+        if (namePrefix != null && descriptionPrefix != null && tagNamePrefix == null){
+            query.append(SELECT_GIFT_BY_NAME_AND_DESCRIPTION);
+            args = new Object[2];
+            args[0] = namePrefixWithWildCard;
+            args[1] = descriptionPrefixWithWildCard;
+        }
+        if (namePrefix == null && descriptionPrefix != null && tagNamePrefix != null){
+            query.append(SELECT_GIFT_BY_TAG_NAME_AND_GIFT_DESCRIPTION);
+            args = new Object[2];
+            args[0] = descriptionPrefixWithWildCard;
+            args[1] = tagNamePrefixWithWildCard;
+        }
+        if (namePrefix != null && descriptionPrefix == null && tagNamePrefix != null){
+            query.append(SELECT_GIFT_BY_TAG_NAME_AND_GIFT_NAME);
+            args = new Object[2];
+            args[0] = namePrefixWithWildCard;
+            args[1] = tagNamePrefixWithWildCard;
+        }
+        if (namePrefix != null && descriptionPrefix != null && tagNamePrefix != null){
+            query.append(SELECT_GIFT_BY_TAG_NAME_AND_GIFT_NAME_AND_DESCRIPTION);
+            args = new Object[3];
+            args[0] = namePrefixWithWildCard;
+            args[1] = descriptionPrefixWithWildCard;
+            args[2] = tagNamePrefixWithWildCard;
+        }
+
+        if (sortField != null && sortMethod != null){
+            if (sortField.equals(SearchConstants.NAME_FIELD)){
+                if (sortMethod.equals(SearchConstants.ASC_METHOD_SORT)){
+                    query.append(SORT_BY_NAME_ASC);
+                }
+                if (sortMethod.equals(SearchConstants.DESC_METHOD_SORT)){
+                    query.append(SORT_BY_NAME_DESC);
+                }
+            }
+            if (sortField.equals(SearchConstants.DATE_FIELD)){
+                if (sortMethod.equals(SearchConstants.ASC_METHOD_SORT)){
+                    query.append(SORT_BY_CREATE_DATE_ASC);
+                }
+                if (sortMethod.equals(SearchConstants.DESC_METHOD_SORT)){
+                    query.append(SORT_BY_CREATE_DATE_DESC);
+                }
+            }
+        }
+        return QueryArgModel.builder()
+                .query(query.toString())
+                .args(args).build();
     }
 
 }

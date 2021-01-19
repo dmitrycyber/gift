@@ -3,7 +3,6 @@ package by.mjs.ivoninsky.gift.service.impl;
 import by.mjs.ivoninsky.gift.dao.GiftDao;
 import by.mjs.ivoninsky.gift.dao.GiftTagDao;
 import by.mjs.ivoninsky.gift.dao.TagDao;
-import by.mjs.ivoninsky.gift.dao.exception.GiftNotFoundException;
 import by.mjs.ivoninsky.gift.model.CustomSearchRequest;
 import by.mjs.ivoninsky.gift.model.dto.GiftCertificateDto;
 import by.mjs.ivoninsky.gift.model.entity.GiftCertificateEntity;
@@ -37,7 +36,7 @@ public class GiftServiceImpl implements GiftService {
 
 
     @Override
-    public List<GiftCertificateDto> getAllGifts() throws ServiceException {
+    public List<GiftCertificateDto> getAllGifts(){
         List<GiftCertificateDto> giftCertificateDtoList = giftDao.findAllGifts().stream()
                 .map(EntityConverter::convertGiftEntityDto)
                 .collect(Collectors.toList());
@@ -46,24 +45,13 @@ public class GiftServiceImpl implements GiftService {
     }
 
     @Override
-    public GiftCertificateDto getGiftById(Long giftId) throws ServiceException {
+    public GiftCertificateDto getGiftById(Long giftId) {
         return EntityConverter.convertGiftEntityDto(giftDao.findGiftById(giftId));
     }
 
     @Override
-    public List<GiftCertificateDto> searchGifts(CustomSearchRequest customSearchRequest) throws ServiceException {
-        List<GiftCertificateEntity> giftList = new ArrayList<>();
-
-        if (customSearchRequest.getName() != null){
-            giftList = giftDao.findGiftByName(customSearchRequest);
-
-        }
-        if (customSearchRequest.getDurationFrom() != null && customSearchRequest.getDurationTo() != null){
-            giftList = giftDao.findGiftByDuration(customSearchRequest);
-        }
-        if (customSearchRequest.getPriceFrom() != null && customSearchRequest.getPriceTo() != null){
-            giftList = giftDao.findGiftByPrice(customSearchRequest);
-        }
+    public List<GiftCertificateDto> searchGifts(CustomSearchRequest customSearchRequest) {
+        List<GiftCertificateEntity> giftList = giftDao.findAndSortGift(customSearchRequest);
 
         return giftList.stream()
                 .map(EntityConverter::convertGiftEntityDto)
@@ -72,7 +60,7 @@ public class GiftServiceImpl implements GiftService {
 
     @Override
     @Transactional
-    public GiftCertificateDto createGift(GiftCertificateDto giftCertificateDto) throws ServiceException {
+    public GiftCertificateDto createGift(GiftCertificateDto giftCertificateDto) {
 
         GiftCertificateEntity giftEntity = giftDao.createGift(EntityConverter.convertGiftDtoEntity(giftCertificateDto));
 
@@ -95,14 +83,14 @@ public class GiftServiceImpl implements GiftService {
     }
 
     @Override
-    public GiftCertificateDto updateGift(GiftCertificateDto giftCertificateDto) throws ServiceException {
+    public GiftCertificateDto updateGift(GiftCertificateDto giftCertificateDto) {
         GiftCertificateEntity entity = giftDao.updateGift(EntityConverter.convertGiftDtoEntity(giftCertificateDto));
 
         return EntityConverter.convertGiftEntityDto(entity);
     }
 
     @Override
-    public void deleteGiftById(Long giftId) throws ServiceException {
+    public void deleteGiftById(Long giftId) {
         giftDao.deleteGiftById(giftId);
     }
 }

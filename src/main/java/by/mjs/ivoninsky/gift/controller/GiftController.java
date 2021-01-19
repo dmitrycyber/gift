@@ -1,46 +1,49 @@
 package by.mjs.ivoninsky.gift.controller;
 
-import by.mjs.ivoninsky.gift.model.ErrorResponse;
 import by.mjs.ivoninsky.gift.model.CustomSearchRequest;
 import by.mjs.ivoninsky.gift.model.dto.GiftCertificateDto;
-import by.mjs.ivoninsky.gift.model.dto.TagDto;
 import by.mjs.ivoninsky.gift.service.GiftService;
-import by.mjs.ivoninsky.gift.dao.exception.GiftNotFoundException;
-import by.mjs.ivoninsky.gift.util.Status;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.servlet.ModelAndView;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.util.ArrayList;
+
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/gifts")
 public class GiftController {
     private final GiftService giftService;
+    private final CustomSearchRequest defaultCustomSearchRequest;
 
 
     @Autowired
     public GiftController(GiftService giftService) {
         this.giftService = giftService;
+        defaultCustomSearchRequest = CustomSearchRequest.builder().build();
     }
 
 
     @GetMapping
-    //add search request too
-    public ResponseEntity<List<GiftCertificateDto>> allGifts(CustomSearchRequest customSearchRequest) {
-        System.out.println("CUSTOM SEARCH REQUEST " + customSearchRequest);
+    @ApiOperation(value = "Api v1. Get all gifts")
+    public ResponseEntity<List<GiftCertificateDto>> allGifts(
+            @ApiParam(name = "descriptionPrefix", value = "Search by gift description") String descriptionPrefix,
+            @ApiParam(name = "namePrefix", value = "Search by gift name") String namePrefix,
+            @ApiParam(name = "sortField", value = "Sort by fields \"name\" or \"date\"") String sortField,
+            @ApiParam(name = "sortMethod", value = "Sort methods \"asc\" or \"desc\"") String sortMethod,
+            @ApiParam(name = "tagNamePrefix", value = "Search by tag name") String tagNamePrefix
+            ) {
         List<GiftCertificateDto> allGifts;
 
-        if (!customSearchRequest.equals(CustomSearchRequest.builder().build())){
+        CustomSearchRequest customSearchRequest = CustomSearchRequest.builder()
+                .descriptionPrefix(descriptionPrefix)
+                .namePrefix(namePrefix)
+                .sortField(sortField)
+                .sortMethod(sortMethod)
+                .tagNamePrefix(tagNamePrefix).build();
+
+        if (!customSearchRequest.equals(defaultCustomSearchRequest)){
             allGifts = giftService.searchGifts(customSearchRequest);
         }
         else {
@@ -51,6 +54,7 @@ public class GiftController {
     }
 
     @GetMapping("/{id}")
+    @ApiOperation(value = "Api v1. Get gift by id")
     public ResponseEntity<GiftCertificateDto> giftById(
             @PathVariable Long id
     ) {
@@ -60,17 +64,17 @@ public class GiftController {
     }
 
     @PostMapping
+    @ApiOperation(value = "Api v1. Create gift")
     public ResponseEntity<GiftCertificateDto> createGift(
             @RequestBody GiftCertificateDto giftCertificateDto
     ) {
-        System.out.println("CREATE GIFT " + giftCertificateDto);
-
         GiftCertificateDto gift = giftService.createGift(giftCertificateDto);
 
         return ResponseEntity.ok(gift);
     }
 
     @PutMapping("/{id}")
+    @ApiOperation(value = "Api v1. Update gift")
     public ResponseEntity<GiftCertificateDto> updateGift(
             @RequestBody GiftCertificateDto giftCertificateDto,
             @PathVariable Long id
@@ -84,6 +88,7 @@ public class GiftController {
     }
 
     @DeleteMapping("/{id}")
+    @ApiOperation(value = "Api v1. Delete gift by id")
     public ResponseEntity deleteGift(
             @PathVariable Long id
     ) {
@@ -91,17 +96,4 @@ public class GiftController {
 
         return ResponseEntity.ok().build();
     }
-
-    //    @PostMapping("/search")
-//    public ResponseEntity<ErrorResponse<List<GiftCertificateDto>>> searchGift(
-//            @RequestBody CustomSearchRequest customSearchRequest
-//    ) {
-//
-//        List<GiftCertificateDto> giftCertificateDtos = giftService.searchGifts(customSearchRequest);
-//
-//        ErrorResponse<List<GiftCertificateDto>> build = ErrorResponse.<List<GiftCertificateDto>>builder()
-//                .message(giftCertificateDtos)
-//                .code(Status.SUCCESSFUL.getCode()).build();
-//        return ResponseEntity.ok(build);
-//    }
 }

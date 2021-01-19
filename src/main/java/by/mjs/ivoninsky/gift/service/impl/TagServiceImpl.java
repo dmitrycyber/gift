@@ -24,7 +24,7 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public List<TagDto> getAllTags() throws ServiceException {
+    public List<TagDto> getAllTags() {
         List<TagEntity> allTags = tagDao.findAllTags();
 
         return allTags.stream()
@@ -33,12 +33,12 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public TagDto getTagById(Long tagId) throws ServiceException {
+    public TagDto getTagById(Long tagId) {
         return EntityConverter.convertTagEntityDto(tagDao.findTagById(tagId));
     }
 
     @Override
-    public List<TagDto> getTagByName(String tagName) throws ServiceException {
+    public List<TagDto> getTagByName(String tagName) {
         List<TagEntity> tagByName = tagDao.findTagByName(tagName);
 
         return tagByName.stream()
@@ -47,7 +47,7 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public List<TagDto> getTagByPartName(String tagName) throws ServiceException {
+    public List<TagDto> getTagByPartName(String tagName){
         List<TagEntity> tagByName = tagDao.findTagByPartName(tagName);
 
         return tagByName.stream()
@@ -56,14 +56,14 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public TagDto createTag(TagDto tagDto) throws ServiceException {
+    public TagDto createTag(TagDto tagDto){
         TagEntity tagEntity = EntityConverter.convertTagDtoEntity(tagDto);
 
         return EntityConverter.convertTagEntityDto(tagDao.createTag(tagEntity));
     }
 
     @Override
-    public void deleteTagById(Long tagId) throws ServiceException {
+    public void deleteTagById(Long tagId){
         tagDao.deleteTagById(tagId);
     }
 }
